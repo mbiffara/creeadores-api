@@ -1,35 +1,35 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `src/` holds the TypeScript API code; group handlers in `src/routes/`, domain logic in `src/services/`, and persistence utilities in `src/db/`.
-- Shared DTOs and validation schemas belong in `src/models/` so request/response shapes stay consistent across agents.
-- `tests/` mirrors `src/` with matching filenames (e.g., `src/services/user.ts` ⇢ `tests/services/user.test.ts`).
-- `scripts/` stores maintenance helpers (seeding, migrations); `config/` keeps environment-specific JSON/YAML that should not contain secrets.
+- `src/` holds all runtime TypeScript: route adapters in `src/routes/`, domain logic in `src/services/`, DB helpers in `src/db/`, and shared utilities in `src/lib/`.
+- Contracts (DTOs, Zod/Joi schemas) live in `src/models/`; import them from controllers, services, and tests to avoid drift.
+- Background workers reuse the same services and live in `src/workers/`. Configuration defaults stay in `src/config/`.
+- `tests/` mirrors `src/` naming (`src/services/user.ts` → `tests/services/user.test.ts`). Fixtures and data builders live under `tests/fixtures/`.
+- Automation scripts go into `scripts/` (migrations, seeding). Example payloads or media assets belong inside `assets/`.
 
 ## Build, Test, and Development Commands
-- `npm install` — sync dependencies (rerun after updating `package.json`).
-- `npm run dev` — start the local API with hot reload via ts-node-dev.
-- `npm run build` — emit production JavaScript into `dist/` and type-check the project.
-- `npm test` — execute Jest suites once; add `--watch` while iterating locally.
-- `npm run lint` — run ESLint/Prettier validation; commit only after this passes.
+- `npm install` — sync dependencies; rerun after editing `package.json` or `.nvmrc`.
+- `npm run dev` — start the API with ts-node-dev hot reload and `.env.local` overrides.
+- `npm run build` — compile to `dist/` and fail on type or lint errors.
+- `npm test` / `npm test -- --watch` — run Jest once or continuously; append `--coverage` before a PR.
+- `npm run lint` and `npm run format` — enforce ESLint + Prettier; CI blocks on failures.
 
 ## Coding Style & Naming Conventions
-- TypeScript, ECMAScript modules, 2-space indentation, single quotes, and trailing commas.
-- Export one default per module; prefer named exports for shared utilities.
-- Use PascalCase for classes, camelCase for functions/variables, UPPER_SNAKE_CASE for constants and env keys.
-- Keep controllers thin: input validation → service call → response mapping with early returns.
+- TypeScript strict mode, ECMAScript modules, 2-space indent, single quotes, trailing commas. No `console.log` outside debug utilities.
+- PascalCase classes, camelCase functions/variables, UPPER_SNAKE_CASE env keys, kebab-case file names.
+- Keep services pure when possible and return POJOs from controllers to simplify serialization.
 
 ## Testing Guidelines
-- Jest with ts-jest; create one `.test.ts` per module under `tests/`.
-- Mock external services (HTTP, queues) via `__mocks__/` to keep tests deterministic.
-- Aim for ≥85% statement coverage; run `npm test -- --coverage` before opening a PR.
+- Jest with ts-jest; create a `.test.ts` sibling for every module under `tests/`.
+- Mock HTTP/queue calls via `__mocks__/` or `nock`; seed deterministic data with helpers in `tests/fixtures/`.
+- Maintain ≥85% statement coverage and run `npm test -- --coverage` before pushing.
 
 ## Commit & Pull Request Guidelines
-- Follow Conventional Commits (`feat:`, `fix:`, `chore:`, `refactor:`). Imperative, <72 char subject, detailed body if behavior changes.
-- Each PR should describe motivation, solution, and validation steps; attach issue IDs (`Closes #123`).
-- Include screenshots or cURL examples when altering endpoints, and list new env vars in the description.
+- Follow Conventional Commits (`feat:`, `fix:`, `chore:`, etc.); subjects ≤72 chars, bodies explain context or breaking changes.
+- PRs must describe the problem, outline the solution, list validation steps (tests, curl scripts, screenshots), and reference linked issues (`Closes #42`).
+- Call out new env vars, migrations, or operational runbooks in a short “Deployment Notes” section.
 
 ## Security & Configuration Tips
-- Never commit `.env`; rely on `.env.example` to document required variables.
-- Rotate API keys used in fixtures; use `scripts/seed.ts` to provision sanitized demo data.
-- Validate every request payload via centralized schema middleware to prevent injection and inconsistent states.
+- Never commit secrets; document required keys in `.env.example` and load actual values via the orchestrator.
+- Rotate fixture tokens quarterly with `scripts/seed.ts` and clean local data via `scripts/reset-db.ts`.
+- Guard every entrypoint with schema validation plus role checks; log structured audit events for writes.
