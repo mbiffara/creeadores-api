@@ -11,7 +11,14 @@ router.post('/login', async (req, res, next) => {
   try {
     const payload = emailSignInSchema.parse(req.body);
     const user = await userService.authenticateWithEmail(payload.email, payload.password);
+    if (!user) {
+      console.log("Authentication failed for email:", payload.email);
+    }
+
+    console.log("Authenticated user:", user);
+
     const sessionToken = await sessionService.createSession(user.id);
+    console.log("Created session token:", sessionToken);
     setSessionCookie(res, sessionToken);
     return res.json({ user });
   } catch (error) {
