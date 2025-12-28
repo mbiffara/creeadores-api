@@ -136,6 +136,7 @@ model User {
   country          String?
   instagramHandle  String?
   instagramAccessToken String?
+  instagramConnectedAt DateTime?
   tiktokHandle     String?
   youtubeHandle    String?
   verifiedAt       DateTime?

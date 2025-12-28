@@ -22,11 +22,17 @@ const userSelect = {
   phoneNumber: true,
   country: true,
   instagramHandle: true,
+  instagramConnectedAt: true,
   tiktokHandle: true,
   youtubeHandle: true,
   verifiedAt: true,
   createdAt: true,
   updatedAt: true,
+};
+
+const userWithInstagramSelect = {
+  ...userSelect,
+  instagramAccessToken: true,
 };
 
 const hashPassword = (password: string) => {
@@ -214,16 +220,27 @@ export const userService = {
   },
 
   async getUserById(id: string) {
-    return prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id },
-      select: userSelect,
+      select: userWithInstagramSelect,
     });
+
+    if (!user) {
+      return null;
+    }
+
+    const { instagramAccessToken, ...safeUser } = user;
+
+    return {
+      ...safeUser,
+      instagramConnected: Boolean(instagramAccessToken && user.instagramConnectedAt),
+    };
   },
 
   async setInstagramAccessToken(userId: string, accessToken: string) {
     await prisma.user.update({
       where: { id: userId },
-      data: { instagramAccessToken: accessToken },
+      data: { instagramAccessToken: accessToken, instagramConnectedAt: new Date() },
     });
   },
 
