@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum CollaborationStatus {
+  INVITED
+  ACCEPTED
+  IN_PROGRESS
+  DELIVERED
+  APPROVED
+  PAID
+  REJECTED
+  CANCELED
+}
+
+enum SignUpMethod {
+  EMAIL
+  GOOGLE
+}
+
+model Brand {
+  id           String     @id @default(uuid())
+  name         String
+  contactEmail String     @unique
+  contactName  String?
+  website      String?
+  industries   String[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  campaigns    Campaign[]
+}
+
+model Creator {
+  id            String           @id @default(uuid())
+  displayName   String
+  email         String           @unique
+  instagram     String?
+  tiktok        String?
+  niches        String[]
+  languages     String[]
+  location      String?
+  bio           String?
+  socialHandles Json?
+  rateCardMin   Int?
+  rateCardMax   Int?
+  timezone      String          @default("UTC")
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  collaborations Collaboration[]
+}
+
+model Campaign {
+  id              String            @id @default(uuid())
+  brandId         String
+  title           String
+  summary         String
+  deliverableTypes String[]
+  status          CampaignStatus    @default(DRAFT)
+  budgetMin       Int
+  budgetMax       Int
+  currency        String            @default("USD")
+  dueDate         DateTime?
+  creativeNotes   String?
+  heroAssetUrl    String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  brand           Brand             @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  collaborations  Collaboration[]
+  briefs          CampaignBrief[]
+
+  @@index([brandId])
+  @@index([status])
+}
+
+model CampaignBrief {
+  id            String   @id @default(uuid())
+  campaignId    String
+  title         String
+  instructions  String
+  referenceUrls String[]
+  assetFolder   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  campaign      Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+}
+
+model Collaboration {
+  id             String               @id @default(uuid())
+  campaignId     String
+  creatorId      String
+  status         CollaborationStatus  @default(INVITED)
+  rateInCents    Int?
+  currency       String               @default("USD")
+  deliverables   Json?
+  notes          String?
+  sidekiqJobId   String?
+  lastMessagedAt DateTime?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  campaign       Campaign             @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  creator        Creator              @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, creatorId])
+  @@index([creatorId])
+  @@index([status])
+}
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  name             String
+  username         String    @unique
+  signUpMethod     SignUpMethod
+  passwordHash     String?
+  phoneNumber      String?
+  country          String?
+  instagramHandle  String?
+  instagramAccessToken String?
+  tiktokHandle     String?
+  youtubeHandle    String?
+  verifiedAt       DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([email])
+  @@index([username])
+}
