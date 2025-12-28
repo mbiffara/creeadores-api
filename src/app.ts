@@ -13,7 +13,7 @@ export const createApp = () => {
 
   app.use('/health', healthRouter);
 
-  app.use('/api', router);
+  app.use(router);
   app.use(errorHandler);
 
   return app;

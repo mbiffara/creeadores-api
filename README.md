@@ -22,8 +22,8 @@ Express + Prisma API for orchestrating creator collaborations between brands, ag
 - `npm run prisma:migrate` — run Prisma migrations interactively.
 
 ## API Surface
-Base URL: `http://localhost:4000/api`
-- `GET /health` (no `/api` prefix) — basic service heartbeat with timestamp.
+Base URL: `http://localhost:4000`
+- `GET /health` — basic service heartbeat with timestamp.
 - `POST /brands` — create a brand.
 - `GET /brands` — list the latest brands.
 - `POST /users` — email + password sign-up (name derived from email, returns profile without password hash).

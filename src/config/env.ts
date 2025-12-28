@@ -16,11 +16,12 @@ const envSchema = z.object({
   INSTAGRAM_REDIRECT_URI: z.string().url().optional(),
 });
 
-console.log(process.env);
+
 
 const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {
+  console.error(process.env);
   console.error('Invalid environment variables', parsed.error.flatten().fieldErrors);
   throw new Error('Invalid environment configuration. Fix .env values and restart the server.');
 }
