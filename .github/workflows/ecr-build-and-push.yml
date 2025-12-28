@@ -45,6 +45,10 @@ jobs:
         id: image
         run: echo "image=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}" >> $GITHUB_OUTPUT
 
+      - name: Debug container name
+        id: debug-container-name
+        run: echo "Container Name ${{ secrets.ECS_CONTAINER_NAME }}"
+
       - name: Render ECS task definition (inject new image)
         id: render-task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
