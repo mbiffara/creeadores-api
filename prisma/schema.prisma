@@ -112,7 +112,7 @@ model Collaboration {
   currency       String               @default("USD")
   deliverables   Json?
   notes          String?
-  sidekiqJobId   String?
+  queueJobId     String?
   lastMessagedAt DateTime?
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt

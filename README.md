@@ -1,11 +1,11 @@
 # CREEADORES API
 
-Express + Prisma API for orchestrating creator collaborations between brands, agencies, and UGC talent. PostgreSQL stores the transactional data, Redis + Sidekiq handle background notifications.
+Express + Prisma API for orchestrating creator collaborations between brands, agencies, and UGC talent. PostgreSQL stores the transactional data, Redis + BullMQ handle background notifications.
 
 ## Prerequisites
 - Node.js 18+
 - PostgreSQL 14+
-- Redis 6+ with a Sidekiq worker configured to read the same queue names defined in `.env`.
+- Redis 6+ with a BullMQ worker configured to read the same queue names defined in `.env`.
 
 ## Setup
 1. Install dependencies: `npm install` (already done in this repo).
@@ -31,8 +31,8 @@ Base URL: `http://localhost:4000/api`
 - `GET /users` — list the latest users.
 - `POST /creators` + `GET /creators` — register and search for creators by `niche` or `search` query.
 - `POST /campaigns` + `GET /campaigns` — manage briefs for each brand.
-- `POST /collaborations` — invite a creator to a campaign; enqueues a Sidekiq job for asynchronous outreach.
+- `POST /collaborations` — invite a creator to a campaign; enqueues a BullMQ job for asynchronous outreach.
 - `GET /collaborations` — review invites per campaign or creator.
 
-## Sidekiq Integration
-The API never executes jobs itself; it serializes payloads that are Sidekiq-compatible and pushes them to `queue:<SIDEKIQ_DEFAULT_QUEUE>` via Redis. Configure a Ruby worker (e.g., `Notifications::CreatorInviteWorker`) to pop those jobs and deliver communication or other long-running tasks.
+## BullMQ Integration
+The API never executes jobs itself; it enqueues jobs into the BullMQ queue defined by `BULLMQ_QUEUE_NAME`. Configure a BullMQ worker to process the `BULLMQ_JOB_NAME` payload and deliver communication or other long-running tasks.

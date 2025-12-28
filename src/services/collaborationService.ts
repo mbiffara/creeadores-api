@@ -4,7 +4,7 @@ import { env } from '../config/env';
 import { prisma } from '../db/client';
 import { HttpError } from '../lib/httpError';
 import { logger } from '../lib/logger';
-import { sidekiqClient } from '../queue/sidekiqClient';
+import { bullmqClient } from '../queue/bullmqClient';
 
 const collaborationInclude = {
   campaign: { select: { id: true, title: true, brand: { select: { id: true, name: true } } } },
@@ -67,31 +67,29 @@ export const collaborationService = {
       include: collaborationInclude,
     })) as CollaborationWithRelations;
 
-    const jobId = await sidekiqClient.enqueue({
-      worker: env.SIDEKIQ_NOTIFICATION_WORKER,
-      args: [
-        {
-          collaborationId: collaboration.id,
-          campaignId: collaboration.campaignId,
-          campaignTitle: collaboration.campaign.title,
-          brandId: campaign.brandId,
-          brandName: campaign.brand.name,
-          creatorId: collaboration.creatorId,
-          creatorName: collaboration.creator.displayName,
-          creatorEmail: collaboration.creator.email,
-          rateInCents: collaboration.rateInCents,
-          currency: collaboration.currency,
-        },
-      ],
+    const jobId = await bullmqClient.enqueue({
+      name: env.BULLMQ_JOB_NAME,
+      data: {
+        collaborationId: collaboration.id,
+        campaignId: collaboration.campaignId,
+        campaignTitle: collaboration.campaign.title,
+        brandId: campaign.brandId,
+        brandName: campaign.brand.name,
+        creatorId: collaboration.creatorId,
+        creatorName: collaboration.creator.displayName,
+        creatorEmail: collaboration.creator.email,
+        rateInCents: collaboration.rateInCents,
+        currency: collaboration.currency,
+      },
     });
 
     if (jobId) {
       await prisma.collaboration.update({
         where: { id: collaboration.id },
-        data: { sidekiqJobId: jobId },
+        data: { queueJobId: jobId },
       });
     } else {
-      logger.warn('Sidekiq job was not enqueued', { collaborationId: collaboration.id });
+      logger.warn('BullMQ job was not enqueued', { collaborationId: collaboration.id });
     }
 
     return collaboration;
