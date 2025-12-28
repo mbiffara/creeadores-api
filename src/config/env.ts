@@ -16,6 +16,8 @@ const envSchema = z.object({
   INSTAGRAM_REDIRECT_URI: z.string().url().optional(),
 });
 
+console.log(process.env);
+
 const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {
