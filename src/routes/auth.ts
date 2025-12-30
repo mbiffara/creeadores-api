@@ -66,6 +66,8 @@ router.get('/me', async (req, res, next) => {
       return res.status(401).json({ error: 'Not authenticated' });
     }
 
+    console.log("Fetched user for /me:", user);
+
     return res.json({ user });
   } catch (error) {
     return next(error);
