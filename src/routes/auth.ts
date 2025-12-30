@@ -40,9 +40,10 @@ router.post('/instagram', async (req, res, next) => {
 
     const payload = instagramAuthSchema.parse(req.body);
     const accessToken = await instagramService.exchangeCodeForToken(payload.code);
-    await userService.setInstagramAccessToken(userId, accessToken);
+    const profile = await instagramService.getProfile(accessToken);
+    await userService.connectInstagram(userId, accessToken, profile.handle, profile.profilePictureUrl);
 
-    return res.json({ ok: true });
+    return res.json({ ok: true, profile });
   } catch (error) {
     return next(error);
   }

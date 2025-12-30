@@ -10,6 +10,18 @@ type InstagramTokenResponse = {
   error_message?: string;
 };
 
+type InstagramProfileResponse = {
+  id?: string;
+  username?: string;
+  profile_picture_url?: string;
+  error?: {
+    message?: string;
+    type?: string;
+  };
+  error_type?: string;
+  error_message?: string;
+};
+
 const requestInstagramToken = (body: string) =>
   new Promise<InstagramTokenResponse>((resolve, reject) => {
     const request = https.request(
@@ -40,6 +52,31 @@ const requestInstagramToken = (body: string) =>
     request.on('error', reject);
     request.write(body);
     request.end();
+  });
+
+const requestInstagramProfile = (accessToken: string) =>
+  new Promise<InstagramProfileResponse>((resolve, reject) => {
+    const params = new URLSearchParams({
+      fields: 'id,username,profile_picture_url',
+      access_token: accessToken,
+    });
+
+    https
+      .get(`https://graph.instagram.com/me?${params.toString()}`, (res) => {
+        let data = '';
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+        res.on('end', () => {
+          try {
+            const payload = JSON.parse(data) as InstagramProfileResponse;
+            resolve(payload);
+          } catch (error) {
+            reject(error);
+          }
+        });
+      })
+      .on('error', reject);
   });
 
 export const instagramService = {
@@ -73,5 +110,28 @@ export const instagramService = {
     }
 
     return response.access_token;
+  },
+
+  async getProfile(accessToken: string) {
+    let response: InstagramProfileResponse;
+
+    try {
+      response = await requestInstagramProfile(accessToken);
+    } catch {
+      throw new HttpError(502, 'Unable to reach Instagram');
+    }
+
+    if (response.error?.message || response.error_message || response.error_type) {
+      throw new HttpError(401, response.error?.message ?? response.error_message ?? 'Invalid Instagram token');
+    }
+
+    if (!response.username) {
+      throw new HttpError(502, 'Instagram profile missing username');
+    }
+
+    return {
+      handle: response.username,
+      profilePictureUrl: response.profile_picture_url ?? null,
+    };
   },
 };

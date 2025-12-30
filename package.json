@@ -10,7 +10,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "test": "npm run lint && echo 'Add tests'",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "creeadores:instagram_sync": "ts-node scripts/update-instagram-users.ts"
   },
   "keywords": [],
   "author": "",

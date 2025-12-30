@@ -1,8 +1,8 @@
-import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import https from 'node:https';
 import { URL } from 'node:url';
 import { prisma } from '../db/client';
 import { HttpError } from '../lib/httpError';
+import { hashPassword, verifyPassword } from '../lib/password';
 
 export type EmailSignUpInput = {
   email: string;
@@ -22,6 +22,7 @@ const userSelect = {
   phoneNumber: true,
   country: true,
   instagramHandle: true,
+  instagramProfilePictureUrl: true,
   instagramConnectedAt: true,
   tiktokHandle: true,
   youtubeHandle: true,
@@ -33,23 +34,6 @@ const userSelect = {
 const userWithInstagramSelect = {
   ...userSelect,
   instagramAccessToken: true,
-};
-
-const hashPassword = (password: string) => {
-  const salt = randomBytes(16).toString('hex');
-  const hash = scryptSync(password, salt, 64).toString('hex');
-  return `scrypt$${salt}$${hash}`;
-};
-
-const verifyPassword = (password: string, storedHash: string) => {
-  const [method, salt, hash] = storedHash.split('$');
-  if (method !== 'scrypt' || !salt || !hash) {
-    return false;
-  }
-
-  const expected = Buffer.from(hash, 'hex');
-  const derived = scryptSync(password, salt, expected.length);
-  return timingSafeEqual(expected, derived);
 };
 
 const normalizeUsernameBase = (value: string) =>
@@ -237,10 +221,15 @@ export const userService = {
     };
   },
 
-  async setInstagramAccessToken(userId: string, accessToken: string) {
+  async connectInstagram(userId: string, accessToken: string, handle: string, profilePictureUrl: string | null) {
     await prisma.user.update({
       where: { id: userId },
-      data: { instagramAccessToken: accessToken, instagramConnectedAt: new Date() },
+      data: {
+        instagramAccessToken: accessToken,
+        instagramConnectedAt: new Date(),
+        instagramHandle: handle,
+        instagramProfilePictureUrl: profilePictureUrl,
+      },
     });
   },
 

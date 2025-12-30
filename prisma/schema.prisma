@@ -135,6 +135,7 @@ model User {
   phoneNumber      String?
   country          String?
   instagramHandle  String?
+  instagramProfilePictureUrl String?
   instagramAccessToken String?
   instagramConnectedAt DateTime?
   tiktokHandle     String?
@@ -145,4 +146,33 @@ model User {
 
   @@index([email])
   @@index([username])
+}
+
+model Company {
+  id        String       @id @default(uuid())
+  name      String
+  ownerId   String?      @unique
+  owner     CompanyUser? @relation("CompanyOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  users     CompanyUser[] @relation("CompanyUsers")
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([ownerId])
+}
+
+model CompanyUser {
+  id           String   @id @default(uuid())
+  companyId    String
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  company      Company  @relation("CompanyUsers", fields: [companyId], references: [id], onDelete: Cascade)
+  ownedCompany Company? @relation("CompanyOwner")
+
+  @@index([companyId])
+  @@index([email])
 }
