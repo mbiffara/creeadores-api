@@ -1,0 +1,1 @@
+{"version":3,"file":"brandService.d.ts","sourceRoot":"","sources":["../../src/services/brandService.ts"],"names":[],"mappings":"AAEA,MAAM,MAAM,gBAAgB,GAAG;IAC7B,IAAI,EAAE,MAAM,CAAC;IACb,YAAY,EAAE,MAAM,CAAC;IACrB,WAAW,CAAC,EAAE,MAAM,CAAC;IACrB,OAAO,CAAC,EAAE,MAAM,CAAC;IACjB,UAAU,CAAC,EAAE,MAAM,EAAE,CAAC;CACvB,CAAC;AAEF,eAAO,MAAM,YAAY;uBACE,gBAAgB;;;;;;;;;;;;;;;;;;;;CAkB1C,CAAC"}

@@ -1,0 +1,23 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.router = void 0;
+const express_1 = require("express");
+const auth_1 = require("./auth");
+const brands_1 = require("./brands");
+const campaigns_1 = require("./campaigns");
+const collaborations_1 = require("./collaborations");
+const creators_1 = require("./creators");
+const companies_1 = require("./companies");
+const users_1 = require("./users");
+const webhooks_1 = require("./webhooks");
+const router = (0, express_1.Router)();
+exports.router = router;
+router.use('/brands', brands_1.brandRouter);
+router.use('/creators', creators_1.creatorRouter);
+router.use('/campaigns', campaigns_1.campaignRouter);
+router.use('/collaborations', collaborations_1.collaborationRouter);
+router.use('/companies', companies_1.companyRouter);
+router.use('/users', users_1.userRouter);
+router.use('/auth', auth_1.authRouter);
+router.use('/webhooks', webhooks_1.webhookRouter);
+//# sourceMappingURL=index.js.map

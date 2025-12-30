@@ -1,0 +1,1 @@
+{"version":3,"file":"companyService.d.ts","sourceRoot":"","sources":["../../src/services/companyService.ts"],"names":[],"mappings":"AAIA,MAAM,MAAM,kBAAkB,GAAG;IAC/B,WAAW,EAAE,MAAM,CAAC;IACpB,IAAI,EAAE,MAAM,CAAC;IACb,KAAK,EAAE,MAAM,CAAC;IACd,KAAK,CAAC,EAAE,MAAM,CAAC;IACf,QAAQ,EAAE,MAAM,CAAC;CAClB,CAAC;AA+BF,eAAO,MAAM,cAAc;kCACW,kBAAkB;;;;;;;;;;;;;;;;;;CAiCvD,CAAC"}
